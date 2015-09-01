@@ -1,0 +1,78 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+    <title>Connextions Bar Chart</title>
+	<meta content="text/html;charset=utf-8" http-equiv="Content-Type">
+
+	<script src="http://d3js.org/d3.v3.min.js" charset="utf-8"></script>
+</head>
+
+<style>
+	body { font-family: verdana; }
+	#canvas rect {
+		font-family: verdana;
+		fill: steelblue; }
+	#canvas .label {
+		fill: white;
+		font: 14px sans-serif;
+		text-anchor: end; }
+</style>
+
+<body>
+	<h1>Connections Bar Chart</h1>
+
+	<svg id="canvas"></svg>
+</body>
+
+<script>
+	var width = 700,
+	    barHeight = 20
+	    minBarWidth = 15;
+
+	d3.json("http://d3.ecosify.com/connect/api/getPeopleData", function(result) {
+		console.log(result);
+		var people = result.data;
+		people.sort(function (a, b) { return b.linkCount - a.linkCount; });
+
+		draw(people);
+	});
+
+	function draw(data) {
+		d3.select("#canvas")
+		    .attr("width", width)
+		    .attr("height", barHeight * data.length);
+
+		x = d3.scale.linear()
+		    .domain([0, d3.max(data, function(d) { return d.linkCount; })])
+		    .range([minBarWidth, width]);
+
+		var selection = d3.select("#canvas").selectAll("g")
+		        .data(data);
+
+		var newBars = selection.enter().append("g");
+
+		newBars.append("rect")
+		    .attr("x", 0)
+		    .attr("width", function(d) { return x(d.linkCount); })
+		    .attr("height", barHeight - 1)
+		    .attr("rx", 4)
+		    .attr("ry", 4);
+
+		newBars.append("text")
+			.classed("label", true)
+		    .attr("x", function(d) { return x(d.linkCount) - 3; })
+		    .attr("y", barHeight / 2)
+		    .attr("dy", ".35em")
+		    .text(function(d) { return d.linkCount; });
+
+	    selection.exit().remove();
+
+	    selection.transition()
+	    	.delay(function(d,i) {return i*100;})
+	    	.duration(500)
+	    	.attr("transform", function(d, i) {
+	            return "translate(0," + i * barHeight + ")";
+	        });
+	}
+</script>
+</html>

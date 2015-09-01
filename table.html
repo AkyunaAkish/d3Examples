@@ -1,0 +1,77 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+    <title>Connextions Table</title>
+	<meta content="text/html;charset=utf-8" http-equiv="Content-Type">
+	<script src="http://d3js.org/d3.v3.min.js" charset="utf-8"></script>
+</head>
+
+<style>
+	body { font-family: verdana; }
+	table, tr {
+		border-collapse: collapse;
+		border: 1px solid black; }
+	th {
+		padding: 5px 20px;
+		background-color: steelblue;
+		color: orange; }
+	tr {
+		background-color: #eee; }
+	.alt {
+		background-color: #ccc; }
+	td {
+		text-align: center;
+		padding: 3px 10px; }
+</style>
+
+<body>
+	<h1>Connections Table</h1>
+	<table>
+		<thead><tr>
+			<th>Number</th>
+			<th>Email Address</th>
+			<th>Connections</th>
+		</tr></thead>
+		<tbody id="canvas">
+		</tbody>
+	</table>
+</body>
+
+<script>
+	d3.json("http://d3.ecosify.com/connect/api/getPeopleData", function (result) {
+		console.log(result);
+
+		draw(result.data);
+	});
+
+	function draw(data) {
+		var selection = d3.select("#canvas").selectAll("tr").data(data);
+
+		var newRows = selection.enter().append("tr");
+
+		newRows.append("td").text(function (d) { return d.id; })
+		newRows.append("td").text(function (d) { return d.email; })
+		newRows.append("td").text(function (d) { return d.linkCount; })
+	}
+
+
+
+
+
+
+	// d3.json("http://d3.ecosify.com/connect/api/getPeopleData", function (result) {
+	// 	console.log(result);
+	// 	var people = result.data;
+
+	// 	var selection = d3.select("#canvas").selectAll("tr")
+	// 		.data(people);
+
+	// 	var newRows = selection.enter().append("tr")
+	// 		.attr("class", function(d,i) { return i % 2 ? "" : "alt"; });
+
+	// 	newRows.append("td").text(function (d) { return d.id; });
+	// 	newRows.append("td").text(function (d) { return d.email; });
+	// 	newRows.append("td").text(function (d) { return d.linkCount; });
+	// });
+</script>
+</html>

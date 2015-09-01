@@ -1,0 +1,93 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+    <title>Connextions Network</title>
+	<meta content="text/html;charset=utf-8" http-equiv="Content-Type">
+	<script src="http://d3js.org/d3.v3.min.js"></script>
+	<script src="http://code.jquery.com/jquery-latest.min.js"></script>
+</head>
+
+<style>
+	body { font-family: verdana; }
+	#canvas .node circle {
+	    fill: steelblue;
+	    stroke: black;
+	    stroke-width: 2px; }
+	#canvas .node text {
+	    fill: white;
+	    font-size: 14;
+	    text-anchor: middle;
+		pointer-events: none; }
+	#canvas .link {
+	    stroke: darkgray;
+	    stroke-width: 2px; }
+</style>
+
+<body>
+	<h1>Connections Network</h1>
+	<svg id="canvas"></svg>
+</body>
+
+<script>
+	var width  = 800
+		height = 600;
+
+	var canvas = d3.select("#canvas")
+	    .attr("width", width)
+	    .attr("height", height);
+
+	var force = d3.layout.force()
+	    .size([width, height])
+	    .charge(-500)
+	    .linkDistance(200);
+
+	d3.json("http://d3.ecosify.com/connect/api/getNetData", function(result) {
+		var originalData = jQuery.extend(true, {}, result.data);
+		// console.log(originalData);
+		// console.log(result.data.nodes);
+		// console.log(result.data.links);
+
+		draw(result.data.nodes, result.data.links);
+	});
+
+	function draw(n, l) {
+		force.nodes(n).links(l);
+
+		var links = canvas.selectAll(".link").data(l);
+
+		var newLinks = links.enter().append("line")
+		    .attr("class", "link");
+
+		var nodes = canvas.selectAll(".node").data(n);
+
+		var newNodes = nodes.enter().append("g")
+			.attr("class", "node")
+			.call(force.drag);
+
+		newNodes.append("circle");
+
+		newNodes.append("text")
+			.text(function(d) { return d.id; })
+			.attr("dy", ".35em");
+
+	    nodes.selectAll("circle")
+	    	.attr("r", function(d) { return 3 * d.linkCount; });
+
+
+		force.on("tick", function() {
+
+		    links.attr("x1", function(d) { return d.source.x; })
+		        .attr("y1", function(d) { return d.source.y; })
+		        .attr("x2", function(d) { return d.target.x; })
+		        .attr("y2", function(d) { return d.target.y; });
+
+		    nodes.attr("transform", function(d) {
+		    	return "translate(" + [d.x, d.y] + ")";
+		    });
+
+		});
+
+		force.start();
+	}
+</script>
+</html>
